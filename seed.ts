@@ -53,7 +53,7 @@ export const flashcards = [
     },
     {
         id: 2,
-        cardSetID: 1,
+        cardSetID: [1,4],
         title: 'அணில்',
         subtitle: 'aNil',
         trTitle: 'Squirrel',
@@ -151,10 +151,12 @@ export const flashcards = [
 
 function createCards() {
     const cards = flashcards.map(async card => {
-        const deck = await getDeckforCardSetID(card.cardSetID);
+        const cardSetIDArr = Array.isArray(card.cardSetID) ? card.cardSetID : [card.cardSetID]
+        const deck = await getDeckforCardSetID(cardSetIDArr);
         let cardData : Prisma.CardCreateInput = {
             enTitle: card.subtitle,
             imageUrl: card.imageUrl,
+            decks: {connect: deck},
             localizations: {
                 create: {
                     title: card.title,
@@ -163,37 +165,23 @@ function createCards() {
                 },
             }
         };
-        if(deck != null) {
-            cardData.decks = {
-                connect: {id: deck.id}
-            }
-        }
         return prisma.card.create({
             data: cardData
-            // data: {
-            //     enTitle: card.subtitle,
-            //     imageUrl: card.imageUrl,
-            //     decks: {
-            //         connect: deck
-            //     },
-            //     localizations: {
-            //         create: {
-            //             title: card.title,
-            //             trTitle: card.trTitle,
-            //             languageCode: 'ta'
-            //         },
-            //     }
-            // }
         });
 
     });
     return Promise.all(cards);
 }
 
-async function getDeckforCardSetID(cardSetID: number) {
-        return await prisma.deck.findFirst({
+async function getDeckforCardSetID(cardSetID: number[]) {
+    const deckids = decks.filter((d) => cardSetID.indexOf(d.id) > -1).map((de)=>de.id)
+            
+        return await prisma.deck.findMany({
             where: {
-                enTitle: decks.find((d) => d.id == cardSetID)?.subtitle
+                id: {in: deckids}
+            },
+            select: {
+                id: true
             }
         })
 }
@@ -221,34 +209,6 @@ function createDecks() {
 async function main() {
     await createDecks();
     await createCards();
-    // await prisma.deck.create({
-    //     data: {
-    //         enTitle: 'Alphabets',
-    //         imageUrl: '/images/giraffe.png',
-    //         description: 'Learn alphabets in Tamil',
-    //         localizations: {
-    //             create: {
-    //                 title: 'எழுத்துக்கள்',
-    //                 trTitle: 'ezhuththukkal',
-    //                 languageCode: 'ta'
-    //             },
-    //         },
-    //         cards: {
-    //             create: [{
-    //                 enTitle: 'Mother',
-    //                 imageUrl: '/images/Amma.png',
-    //                 localizations: {
-    //                     create: {
-    //                         title: 'அம்மா',
-    //                         trTitle: 'amma',
-    //                         audioUrl: '/audio/amma.mp3',
-    //                         languageCode: 'ta',
-    //                     }
-    //                 }
-    //             }]
-    //         }
-    //     }
-    // });
 
 }
 
