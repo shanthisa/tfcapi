@@ -10,23 +10,37 @@ datasource db {
 model Card {
   id           Int           @id @default(autoincrement())
   enTitle      String        @unique
-  imageUrl     String
-  localisations Localisation[]
+  imageUrl     String?
+  localizations CardLocalization[]
   decks   Deck[]
 }
 
 model Deck {
   id         Int          @id @default(autoincrement())
   createdAt  DateTime     @default(now())
-  deckTitle  String
+  enTitle  String
+  imageUrl String
+  description String
   cards Card[]
+  localizations DeckLocalization[]
 }
 
-model Localisation {
+model DeckLocalization {
+  id Int @id @default(autoincrement())
+  deckId Int
+  title       String
+  trTitle     String
+  languageCode String
+  deck Deck @relation(fields: [deckId], references: [id])
+  
+}
+
+model CardLocalization {
   id           Int    @id @default(autoincrement())
   cardId       Int    
-  lTitle       String
-  lEnTitle     String
+  title       String
+  trTitle     String
+  audioUrl  String?
   languageCode String
   card Card @relation(fields: [cardId], references: [id])
 }

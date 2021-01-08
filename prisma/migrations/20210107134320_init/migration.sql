@@ -3,6 +3,7 @@ CREATE TABLE "Card" (
 "id" SERIAL,
     "enTitle" TEXT NOT NULL,
     "imageUrl" TEXT NOT NULL,
+    "description" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
 );
@@ -11,17 +12,29 @@ CREATE TABLE "Card" (
 CREATE TABLE "Deck" (
 "id" SERIAL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "deckTitle" TEXT NOT NULL,
+    "enTitle" TEXT NOT NULL,
+    "imageUrl" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "Localisation" (
+CREATE TABLE "DeckLocalization" (
+"id" SERIAL,
+    "deckId" INTEGER NOT NULL,
+    "title" TEXT NOT NULL,
+    "trTitle" TEXT NOT NULL,
+    "languageCode" TEXT NOT NULL,
+
+    PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CardLocalization" (
 "id" SERIAL,
     "cardId" INTEGER NOT NULL,
-    "lTitle" TEXT NOT NULL,
-    "lEnTitle" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "trTitle" TEXT NOT NULL,
     "languageCode" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
@@ -43,7 +56,10 @@ CREATE UNIQUE INDEX "_CardToDeck_AB_unique" ON "_CardToDeck"("A", "B");
 CREATE INDEX "_CardToDeck_B_index" ON "_CardToDeck"("B");
 
 -- AddForeignKey
-ALTER TABLE "Localisation" ADD FOREIGN KEY("cardId")REFERENCES "Card"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "DeckLocalization" ADD FOREIGN KEY("deckId")REFERENCES "Deck"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "CardLocalization" ADD FOREIGN KEY("cardId")REFERENCES "Card"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_CardToDeck" ADD FOREIGN KEY("A")REFERENCES "Card"("id") ON DELETE CASCADE ON UPDATE CASCADE;
